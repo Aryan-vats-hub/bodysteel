@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body Steel - Stock Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-zinc-950 text-white font-sans p-6 max-w-5xl mx-auto">
+
+    <div class="flex justify-between items-center mb-8 border-b border-zinc-800 pb-4">
+        <div>
+            <h1 class="text-2xl font-black text-amber-500 uppercase">Body Steel Admin</h1>
+            <p class="text-zinc-400 text-sm">Manage Supplement Inventory & Stock</p>
+        </div>
+        <a href="/" class="text-sm bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg font-bold">← View Live Site</a>
+    </div>
+
+    <!-- Add Item Form -->
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-10">
+        <h2 class="text-lg font-bold mb-4">Add New Supplement</h2>
+        <form action="/add_product" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <input type="text" name="name" placeholder="Product Name (e.g. Big Daddy Preworkout)" required class="bg-zinc-800 p-3 rounded-lg border border-zinc-700 text-white text-sm">
+            <input type="text" name="brand" placeholder="Brand Name" required class="bg-zinc-800 p-3 rounded-lg border border-zinc-700 text-white text-sm">
+            <input type="number" name="price" placeholder="Price in ₹" required class="bg-zinc-800 p-3 rounded-lg border border-zinc-700 text-white text-sm">
+            <input type="text" name="category" placeholder="Category (e.g. Protein, Pre-workout)" required class="bg-zinc-800 p-3 rounded-lg border border-zinc-700 text-white text-sm">
+            <input type="url" name="image_url" placeholder="Image URL (Optional)" class="bg-zinc-800 p-3 rounded-lg border border-zinc-700 text-white text-sm md:col-span-2">
+            <button type="submit" class="bg-amber-500 hover:bg-amber-600 text-black font-bold p-3 rounded-lg md:col-span-2 transition">Add Product</button>
+        </form>
+    </div>
+
+    <!-- Products List -->
+    <div class="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
+        <table class="w-full text-left text-sm">
+            <thead class="bg-zinc-800/50 text-zinc-400 uppercase text-xs">
+                <tr>
+                    <th class="p-4">Item</th>
+                    <th class="p-4">Category</th>
+                    <th class="p-4">Price</th>
+                    <th class="p-4">Status</th>
+                    <th class="p-4 text-right">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-800">
+                {% for item in supplements %}
+                <tr>
+                    <td class="p-4 font-bold">{{ item.name }} <br><span class="text-xs font-normal text-zinc-400">{{ item.brand }}</span></td>
+                    <td class="p-4 text-zinc-300">{{ item.category }}</td>
+                    <td class="p-4 text-amber-500 font-bold">₹{{ item.price }}</td>
+                    <td class="p-4">
+                        {% if item.in_stock == 1 %}
+                            <span class="text-emerald-400 font-semibold bg-emerald-500/10 px-2 py-1 rounded">In Stock</span>
+                        {% else %}
+                            <span class="text-red-400 font-semibold bg-red-500/10 px-2 py-1 rounded">Out of Stock</span>
+                        {% endif %}
+                    </td>
+                    <td class="p-4 text-right">
+                        <a href="/toggle_stock/{{ item.id }}" class="px-3 py-1.5 rounded text-xs font-bold transition {% if item.in_stock == 1 %} bg-red-600 hover:bg-red-700 text-white {% else %} bg-emerald-600 hover:bg-emerald-700 text-white {% endif %}">
+                            {% if item.in_stock == 1 %} Mark Out of Stock {% else %} Mark In Stock {% endif %}
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</body>
+</html>

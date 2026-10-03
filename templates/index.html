@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Body Steel Gym & Fitness</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body class="bg-zinc-950 text-white font-sans antialiased">
+
+    <!-- Navbar -->
+    <nav class="border-b border-zinc-800 bg-zinc-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
+        <h1 class="text-2xl font-black tracking-wider text-amber-500 uppercase">BODY STEEL</h1>
+        <div class="space-x-6 text-sm font-semibold">
+            <a href="#about" class="hover:text-amber-500 transition">About</a>
+            <a href="#plans" class="hover:text-amber-500 transition">Membership</a>
+            <a href="#store" class="hover:text-amber-500 transition">Supplements</a>
+            <a href="/admin" class="text-zinc-500 hover:text-white transition">Owner Login</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="py-20 px-6 text-center max-w-4xl mx-auto">
+        <span class="text-xs uppercase tracking-widest bg-amber-500/10 text-amber-500 px-3 py-1 rounded-full border border-amber-500/20 font-bold">Unleash The Beast</span>
+        <h2 class="text-5xl md:text-7xl font-extrabold mt-6 uppercase leading-tight">Forge Your Ultimate Strength</h2>
+        <p class="text-zinc-400 mt-4 text-base md:text-lg">Premium equipment, elite training atmosphere, and authentic nutrition supplements at Body Steel.</p>
+        <div class="mt-8 flex justify-center gap-4">
+            <a href="https://wa.me/919999999999?text=Hi%20Body%20Steel,%20I%20want%20to%20book%20a%20free%20trial" target="_blank" class="bg-amber-500 hover:bg-amber-600 text-black font-bold px-6 py-3 rounded-lg transition shadow-lg shadow-amber-500/20">
+                <i class="fab fa-whatsapp mr-2"></i> Book Free Trial
+            </a>
+            <a href="#store" class="border border-zinc-700 hover:border-zinc-500 px-6 py-3 rounded-lg font-semibold transition">View Store</a>
+        </div>
+    </header>
+
+    <!-- Plans Section -->
+    <section id="plans" class="py-16 max-w-6xl mx-auto px-6 border-t border-zinc-900">
+        <h3 class="text-3xl font-black text-center uppercase tracking-wide mb-10 text-white">Membership Plans</h3>
+        <div class="grid md:grid-cols-3 gap-8">
+            <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 text-center">
+                <h4 class="text-lg font-bold text-zinc-400">1 Month</h4>
+                <div class="text-4xl font-black my-4 text-white">₹1,200</div>
+                <p class="text-zinc-500 text-sm">Full Gym Access • Cardio • General Guidance</p>
+            </div>
+            <div class="bg-zinc-900 p-6 rounded-xl border-2 border-amber-500 text-center shadow-xl shadow-amber-500/10">
+                <span class="text-xs font-bold bg-amber-500 text-black px-2 py-0.5 rounded">POPULAR</span>
+                <h4 class="text-lg font-bold text-zinc-300 mt-2">3 Months</h4>
+                <div class="text-4xl font-black my-4 text-amber-500">₹3,000</div>
+                <p class="text-zinc-400 text-sm">Gym + Diet Chart + Free Shaker</p>
+            </div>
+            <div class="bg-zinc-900 p-6 rounded-xl border border-zinc-800 text-center">
+                <h4 class="text-lg font-bold text-zinc-400">1 Year</h4>
+                <div class="text-4xl font-black my-4 text-white">₹9,999</div>
+                <p class="text-zinc-500 text-sm">All Access + Free Personal Training Week</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Supplements Store Section -->
+    <section id="store" class="py-16 max-w-6xl mx-auto px-6 border-t border-zinc-900">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-10">
+            <div>
+                <h3 class="text-3xl font-black uppercase tracking-wide text-white">Gym Supplement Counter</h3>
+                <p class="text-zinc-400 text-sm mt-1">100% Genuine products available right at the front desk</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {% for item in supplements %}
+            <div class="bg-zinc-900 rounded-xl overflow-hidden border border-zinc-800 flex flex-col">
+                <img src="{{ item.image_url }}" alt="{{ item.name }}" class="h-48 w-full object-cover">
+                <div class="p-5 flex-1 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-zinc-400">{{ item.brand }}</span>
+                            {% if item.in_stock == 1 %}
+                                <span class="bg-emerald-500/20 text-emerald-400 text-xs px-2 py-0.5 rounded-full font-bold">In Stock</span>
+                            {% else %}
+                                <span class="bg-red-500/20 text-red-400 text-xs px-2 py-0.5 rounded-full font-bold">Out of Stock</span>
+                            {% endif %}
+                        </div>
+                        <h4 class="text-lg font-bold text-white">{{ item.name }}</h4>
+                        <div class="text-2xl font-black text-amber-500 mt-2">₹{{ item.price }}</div>
+                    </div>
+
+                    <div class="mt-4">
+                        {% if item.in_stock == 1 %}
+                            <a href="https://wa.me/919999999999?text=Hi%20Body%20Steel,%20I%20want%20to%20buy%20{{ item.name }}%20priced%20at%20₹{{ item.price }}" target="_blank" class="w-full block text-center bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg transition text-sm">
+                                <i class="fab fa-whatsapp mr-1"></i> Buy on WhatsApp
+                            </a>
+                        {% else %}
+                            <button disabled class="w-full bg-zinc-800 text-zinc-500 font-bold py-2.5 rounded-lg cursor-not-allowed text-sm">Currently Unavailable</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+</body>
+</html>
