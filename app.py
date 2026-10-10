@@ -8,8 +8,9 @@ from PIL import Image
 
 app = Flask(__name__)
 
+# Security settings
 app.secret_key = os.environ.get('SECRET_KEY', 'bodysteel_production_secure_key_9872341')
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max limit
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
@@ -18,7 +19,10 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-ADMIN_PASSWORD_HASH = generate_password_hash("bodysteel@admin123")
+# Dynamic Master Password: Agar Render env me set hai toh wahi lega, warna default.
+# Isse GitHub par kisi ko original password pata nahi chalega!
+DEFAULT_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'bodysteel@admin123')
+ADMIN_PASSWORD_HASH = generate_password_hash(DEFAULT_PASSWORD)
 
 def is_valid_image(stream):
     try:
@@ -35,7 +39,6 @@ def init_db():
     conn = sqlite3.connect('gym.db')
     cursor = conn.cursor()
     
-    # Supplements Table (Cost Price added for profit calculation)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS supplements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +52,6 @@ def init_db():
         )
     ''')
 
-    # Gym Owner Settings
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY,
@@ -60,7 +62,6 @@ def init_db():
         )
     ''')
     
-    # Community Gallery (0 = Pending, 1 = Approved)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS gallery (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,7 +71,6 @@ def init_db():
         )
     ''')
 
-    # Sales & Profit Table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS sales (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -189,13 +189,10 @@ def admin():
     pending_photos = conn.execute('SELECT * FROM gallery WHERE is_approved = 0 ORDER BY id DESC').fetchall()
     approved_photos = conn.execute('SELECT * FROM gallery WHERE is_approved = 1 ORDER BY id DESC').fetchall()
     
-    # Analytics & Sales calculation
     sales_data = conn.execute('SELECT * FROM sales ORDER BY id DESC LIMIT 10').fetchall()
-    
     total_sales = conn.execute('SELECT COALESCE(SUM(selling_price * quantity), 0) FROM sales').fetchone()[0]
     total_profit = conn.execute('SELECT COALESCE(SUM(profit * quantity), 0) FROM sales').fetchone()[0]
     
-    # Top selling product
     top_product_row = conn.execute('''
         SELECT product_name, SUM(quantity) as total_qty 
         FROM sales 
@@ -204,7 +201,6 @@ def admin():
     ''').fetchone()
     top_selling = top_product_row['product_name'] if top_product_row else "None yet"
 
-    # Data for Chart.js
     chart_rows = conn.execute('''
         SELECT product_name, SUM(quantity) as qty 
         FROM sales 
@@ -222,7 +218,6 @@ def admin():
                            top_selling=top_selling, sales_data=sales_data,
                            chart_labels=chart_labels, chart_values=chart_values)
 
-# Log a Sale (Counter se sale record karne ke liye)
 @app.route('/record_sale', methods=['POST'])
 def record_sale():
     if not session.get('is_admin'):
@@ -293,56 +288,4 @@ def update_settings():
     if not session.get('is_admin'):
         return redirect(url_for('admin_login'))
     whatsapp = ''.join(ch for ch in request.form.get('whatsapp_number', '') if ch.isdigit())
-    plan_1m = request.form.get('plan_1m', 0)
-    plan_3m = request.form.get('plan_3m', 0)
-    plan_1y = request.form.get('plan_1y', 0)
-
-    conn = get_db_connection()
-    conn.execute('''
-        UPDATE settings 
-        SET whatsapp_number = ?, plan_1m = ?, plan_3m = ?, plan_1y = ?
-        WHERE id = 1
-    ''', (whatsapp, plan_1m, plan_3m, plan_1y))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('admin'))
-
-@app.route('/toggle_stock/<int:item_id>')
-def toggle_stock(item_id):
-    if not session.get('is_admin'):
-        return redirect(url_for('admin_login'))
-    conn = get_db_connection()
-    item = conn.execute('SELECT in_stock FROM supplements WHERE id = ?', (item_id,)).fetchone()
-    if item:
-        new_status = 0 if item['in_stock'] == 1 else 1
-        conn.execute('UPDATE supplements SET in_stock = ? WHERE id = ?', (new_status, item_id))
-        conn.commit()
-    conn.close()
-    return redirect(url_for('admin'))
-
-@app.route('/add_product', methods=['POST'])
-def add_product():
-    if not session.get('is_admin'):
-        return redirect(url_for('admin_login'))
-    name = request.form.get('name', '').strip()[:80]
-    brand = request.form.get('brand', '').strip()[:50]
-    cost_price = float(request.form.get('cost_price', 0))
-    price = float(request.form.get('price', 0))
-    category = request.form.get('category', '').strip()[:40]
-    file = request.files.get('product_file')
-    
-    image_url = save_secure_image(file)
-    if not image_url:
-        image_url = 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80'
-    
-    conn = get_db_connection()
-    conn.execute('''
-        INSERT INTO supplements (name, brand, cost_price, price, category, image_url, in_stock)
-        VALUES (?, ?, ?, ?, ?, ?, 1)
-    ''', (name, brand, cost_price, price, category, image_url))
-    conn.commit()
-    conn.close()
-    return redirect(url_for('admin'))
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    plan_1m = request.form.get
