@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Body Steel - Owner Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-zinc-950 text-white font-sans p-6 max-w-6xl mx-auto">
 
@@ -19,7 +20,60 @@
         </div>
     </div>
 
-    <!-- Gym WhatsApp & Fees Management (Owner Manually Set Karega) -->
+    <!-- 📊 REVENUE & SALES STATS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+            <span class="text-xs text-zinc-400 uppercase font-bold tracking-wider">Total Sales (Revenue)</span>
+            <div class="text-3xl font-black text-emerald-400 mt-2">₹{{ total_sales | int }}</div>
+            <p class="text-xs text-zinc-500 mt-1">Total turnover from supplements</p>
+        </div>
+        <div class="bg-zinc-900 border border-amber-500/30 p-6 rounded-xl">
+            <span class="text-xs text-amber-400 uppercase font-bold tracking-wider">Total Net Profit</span>
+            <div class="text-3xl font-black text-amber-400 mt-2">₹{{ total_profit | int }}</div>
+            <p class="text-xs text-zinc-500 mt-1">Selling Price - Purchase Cost</p>
+        </div>
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl">
+            <span class="text-xs text-zinc-400 uppercase font-bold tracking-wider">Top Selling Item</span>
+            <div class="text-xl font-black text-white mt-2 truncate">{{ top_selling }}</div>
+            <p class="text-xs text-zinc-500 mt-1">Most popular among members</p>
+        </div>
+    </div>
+
+    <!-- 📈 VISUAL SALES GRAPH & QUICK SALE RECORDER -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+        <!-- Sales Chart -->
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl md:col-span-2">
+            <h2 class="text-base font-bold text-white mb-4">Supplement Sales Breakdown (Units Sold)</h2>
+            <div class="h-64">
+                <canvas id="salesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Quick Log Sale -->
+        <div class="bg-zinc-900 border border-zinc-800 p-6 rounded-xl flex flex-col justify-between">
+            <div>
+                <h2 class="text-base font-bold text-amber-500 mb-2">Record a Sale</h2>
+                <p class="text-xs text-zinc-400 mb-4">Counter par koi item bika toh yahan log karein</p>
+                <form action="/record_sale" method="POST" class="space-y-3">
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-1">Select Supplement</label>
+                        <select name="product_id" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-xs">
+                            {% for item in supplements %}
+                            <option value="{{ item.id }}">{{ item.name }} (₹{{ item.price | int }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-xs text-zinc-400 block mb-1">Quantity</label>
+                        <input type="number" name="quantity" value="1" min="1" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-xs">
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold p-2.5 rounded-lg text-xs transition">Log Sale & Update Profit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gym WhatsApp & Fees Management -->
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
         <h2 class="text-lg font-bold text-amber-500 mb-4">Gym Settings & Pricing Controls</h2>
         <form action="/update_settings" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -72,16 +126,17 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-        <!-- Add Supplement Form -->
+        <!-- Add Supplement Form (With Cost Price for Profit Tracking) -->
         <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
             <h2 class="text-lg font-bold mb-4">Add Supplement to Store</h2>
             <form action="/add_product" method="POST" enctype="multipart/form-data" class="space-y-3">
                 <input type="text" name="name" placeholder="Product Name" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
                 <input type="text" name="brand" placeholder="Brand Name" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
                 <div class="grid grid-cols-2 gap-3">
-                    <input type="number" name="price" placeholder="Price in ₹" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
-                    <input type="text" name="category" placeholder="Category" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
+                    <input type="number" name="cost_price" placeholder="Cost Price (₹ Khareed)" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
+                    <input type="number" name="price" placeholder="Selling Price (₹ Bikri)" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
                 </div>
+                <input type="text" name="category" placeholder="Category (e.g. Protein, Pre-workout)" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
                 <div>
                     <label class="text-xs text-zinc-400 block mb-1">Select Supplement Image (From Device)</label>
                     <input type="file" name="product_file" accept="image/*" class="w-full text-xs text-zinc-300 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-white cursor-pointer">
@@ -134,7 +189,7 @@
         </table>
     </div>
 
-    <!-- Live Approved Photos (Can Delete anytime) -->
+    <!-- Live Approved Photos -->
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <h3 class="font-bold text-sm mb-4">Currently Live Photos in Gallery</h3>
         <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
@@ -147,5 +202,34 @@
         </div>
     </div>
 
+    <script>
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        const labels = {{ chart_labels | safe }};
+        const dataValues = {{ chart_values | safe }};
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels.length ? labels : ['No Sales Yet'],
+                datasets: [{
+                    label: 'Units Sold',
+                    data: dataValues.length ? dataValues : [0],
+                    backgroundColor: '#f59e0b',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#27272a' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
