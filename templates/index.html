@@ -13,7 +13,7 @@
 </head>
 <body class="bg-[#09090b] text-zinc-100 font-['Inter'] antialiased selection:bg-amber-500 selection:text-black">
 
-    <!-- Aggressive Bold Sticky Navbar -->
+    <!-- Sticky Navbar -->
     <nav class="border-b border-zinc-800/80 bg-black/90 backdrop-blur-md sticky top-0 z-50 px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center text-black font-black text-xl shadow-lg shadow-amber-500/30">
@@ -34,7 +34,7 @@
         </div>
     </nav>
 
-    <!-- Hardcore Hero Banner -->
+    <!-- Hardcore Hero Banner (Free trial removed) -->
     <header class="relative overflow-hidden pt-24 pb-28 px-6 text-center border-b border-zinc-900 bg-radial from-zinc-900 via-black to-[#09090b]">
         <div class="max-w-4xl mx-auto relative z-10">
             <div class="inline-flex items-center gap-2 text-xs uppercase font-black tracking-widest bg-amber-500/10 text-amber-400 px-4 py-1.5 rounded-full border border-amber-500/30 mb-6">
@@ -48,8 +48,8 @@
             </p>
             
             <div class="mt-10 flex flex-wrap justify-center gap-4">
-                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20book%20my%20FREE%20TRIAL%20PASS!" target="_blank" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-black font-black uppercase tracking-wider px-8 py-4 rounded-xl transition shadow-xl shadow-amber-500/20 text-sm flex items-center gap-2">
-                    <i class="fab fa-whatsapp text-lg"></i> Claim Free 1-Day Trial
+                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20enquire%20about%20gym%20admission!" target="_blank" class="bg-gradient-to-r from-amber-500 to-orange-500 hover:brightness-110 text-black font-black uppercase tracking-wider px-8 py-4 rounded-xl transition shadow-xl shadow-amber-500/20 text-sm flex items-center gap-2">
+                    <i class="fab fa-whatsapp text-lg"></i> Join Gym on WhatsApp
                 </a>
                 <a href="#plans" class="bg-zinc-900 border border-zinc-700 hover:border-amber-500 px-8 py-4 rounded-xl font-bold uppercase tracking-wider text-sm transition">
                     View Membership Fees
@@ -74,7 +74,7 @@
         </div>
     </header>
 
-    <!-- Membership Plans (Managed by Owner) -->
+    <!-- Membership Plans Section -->
     <section id="plans" class="py-24 max-w-6xl mx-auto px-6">
         <div class="text-center mb-16">
             <span class="text-xs uppercase font-black tracking-widest text-amber-500">Transparent Pricing</span>
@@ -83,7 +83,6 @@
         </div>
 
         <div class="grid md:grid-cols-3 gap-8 items-stretch">
-            <!-- 1 Month -->
             <div class="bg-zinc-950 border border-zinc-800 p-8 rounded-2xl flex flex-col justify-between hover:border-zinc-700 transition">
                 <div>
                     <span class="text-xs font-black uppercase text-zinc-400 tracking-wider">Starter</span>
@@ -98,12 +97,11 @@
                         <li class="flex items-center gap-2"><i class="fas fa-check text-zinc-600"></i> General Workout Guidance</li>
                     </ul>
                 </div>
-                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20am%20interested%20in%20the%201%20Month%20Plan%20(₹{{ settings.plan_1m | int }})" target="_blank" class="mt-8 block text-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-extrabold uppercase py-3.5 rounded-xl text-xs tracking-wider transition">
+                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20join%20for%201%20Month%20Plan%20(₹{{ settings.plan_1m | int }})" target="_blank" class="mt-8 block text-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-extrabold uppercase py-3.5 rounded-xl text-xs tracking-wider transition">
                     Enroll 1 Month
                 </a>
             </div>
 
-            <!-- 3 Months (Featured) -->
             <div class="relative bg-zinc-900/90 border-2 border-amber-500 p-8 rounded-2xl flex flex-col justify-between shadow-2xl shadow-amber-500/10 transform md:-translate-y-2">
                 <span class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-500 to-orange-500 text-black text-[10px] font-black uppercase tracking-widest px-4 py-1 rounded-full shadow-md">
                     Most Popular Choice
@@ -121,12 +119,11 @@
                         <li class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Free Body Composition Tracking</li>
                     </ul>
                 </div>
-                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20am%20interested%20in%20the%203%20Months%20Plan%20(₹{{ settings.plan_3m | int }})" target="_blank" class="mt-8 block text-center bg-amber-500 hover:bg-amber-400 text-black font-black uppercase py-4 rounded-xl text-xs tracking-wider transition shadow-lg shadow-amber-500/20">
+                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20join%20for%203%20Months%20Plan%20(₹{{ settings.plan_3m | int }})" target="_blank" class="mt-8 block text-center bg-amber-500 hover:bg-amber-400 text-black font-black uppercase py-4 rounded-xl text-xs tracking-wider transition shadow-lg shadow-amber-500/20">
                     Get 3 Months Pass
                 </a>
             </div>
 
-            <!-- 1 Year -->
             <div class="bg-zinc-950 border border-zinc-800 p-8 rounded-2xl flex flex-col justify-between hover:border-zinc-700 transition">
                 <div>
                     <span class="text-xs font-black uppercase text-zinc-400 tracking-wider">Iron Dedicated</span>
@@ -141,7 +138,7 @@
                         <li class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> VIP Locker & Shower Privilege</li>
                     </ul>
                 </div>
-                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20am%20interested%20in%20the%201%20Year%20Plan%20(₹{{ settings.plan_1y | int }})" target="_blank" class="mt-8 block text-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-extrabold uppercase py-3.5 rounded-xl text-xs tracking-wider transition">
+                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20join%20for%201%20Year%20Plan%20(₹{{ settings.plan_1y | int }})" target="_blank" class="mt-8 block text-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-extrabold uppercase py-3.5 rounded-xl text-xs tracking-wider transition">
                     Enroll 1 Year
                 </a>
             </div>
@@ -208,7 +205,6 @@
                 <p class="text-zinc-400 text-sm">Workout sessions, equipment updates, and member transformations.</p>
             </div>
             
-            <!-- Secure Member Upload Form -->
             <form action="/upload_photo" method="POST" enctype="multipart/form-data" class="bg-zinc-950 border border-zinc-800 p-3 rounded-2xl flex flex-wrap items-center gap-2 w-full md:w-auto">
                 <input type="file" name="photo_file" accept="image/*" required class="text-xs text-zinc-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-black file:bg-zinc-800 file:text-amber-400 hover:file:bg-zinc-700 cursor-pointer">
                 <input type="text" name="caption" placeholder="Short caption..." class="bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500">
