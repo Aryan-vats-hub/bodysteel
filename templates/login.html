@@ -3,25 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Body Steel Admin Login</title>
+    <title>Body Steel - Owner Verification</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-zinc-950 text-white flex items-center justify-center min-h-screen px-4">
-    <div class="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl max-w-sm w-full shadow-2xl">
-        <h2 class="text-2xl font-black text-amber-500 uppercase tracking-wide text-center">Body Steel</h2>
-        <p class="text-zinc-400 text-sm text-center mt-1">Owner Access Verification</p>
-        
-        {% if error %}
-        <p class="text-red-500 text-xs text-center mt-3 bg-red-500/10 py-1.5 rounded">{{ error }}</p>
-        {% endif %}
+<body class="bg-black text-white flex items-center justify-center min-h-screen px-4 antialiased selection:bg-amber-500 selection:text-black">
 
-        <form method="POST" class="mt-6 space-y-4">
-            <div>
-                <label class="text-xs uppercase tracking-wider text-zinc-400 font-bold block mb-1">Enter Master Password</label>
-                <input type="password" name="password" required placeholder="••••••••" class="w-full bg-zinc-800 border border-zinc-700 rounded-lg p-3 text-white text-sm focus:outline-none focus:border-amber-500">
+    <div class="relative w-full max-w-md">
+        <!-- Glow Backdrop -->
+        <div class="absolute -inset-1 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-500 rounded-3xl blur-xl opacity-30 animate-pulse"></div>
+
+        <div class="relative bg-zinc-950 border border-zinc-800/80 p-8 sm:p-10 rounded-2xl shadow-2xl backdrop-blur-md">
+            
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-500 mb-4 shadow-inner">
+                    <i class="fas fa-shield-halved text-2xl"></i>
+                </div>
+                <h1 class="text-3xl font-black uppercase tracking-wider text-white">BODY STEEL</h1>
+                <p class="text-xs font-bold uppercase tracking-widest text-amber-500 mt-1">Owner Command Center</p>
             </div>
-            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold py-3 rounded-lg text-sm transition">Login</button>
-        </form>
+
+            {% if error %}
+            <div class="mb-6 p-3 rounded-xl bg-red-950/60 border border-red-800 text-red-300 text-xs font-semibold flex items-center gap-2">
+                <i class="fas fa-triangle-exclamation text-red-400"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <form method="POST" class="space-y-6">
+                <div>
+                    <label class="block text-xs font-black uppercase tracking-wider text-zinc-400 mb-2">Master Security Key</label>
+                    <div class="relative">
+                        <input type="password" id="adminPassword" name="password" required placeholder="Enter password" 
+                            class="w-full bg-zinc-900/90 border border-zinc-700/80 rounded-xl px-4 py-3.5 pr-12 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition font-mono tracking-wide">
+                        
+                        <!-- Toggle Show/Hide Eye Button -->
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-zinc-400 hover:text-amber-400 transition cursor-pointer">
+                            <i id="eyeIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:brightness-110 text-black font-black uppercase tracking-wider py-4 rounded-xl text-sm transition transform active:scale-95 shadow-lg shadow-amber-500/25">
+                    Unlock Dashboard
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <a href="/" class="text-xs font-bold text-zinc-500 hover:text-zinc-300 transition tracking-wide">← Return to Public Website</a>
+            </div>
+        </div>
     </div>
+
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('adminPassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+    </script>
 </body>
 </html>
