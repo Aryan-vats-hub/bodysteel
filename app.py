@@ -1,15 +1,15 @@
 import os
 import sqlite3
 import uuid
+import json
 from flask import Flask, render_template, request, redirect, url_for, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from PIL import Image
 
 app = Flask(__name__)
 
-# Security settings
 app.secret_key = os.environ.get('SECRET_KEY', 'bodysteel_production_secure_key_9872341')
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max upload
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB max
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 
@@ -18,7 +18,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Master Admin Password (Secure Hashed)
 ADMIN_PASSWORD_HASH = generate_password_hash("bodysteel@admin123")
 
 def is_valid_image(stream):
@@ -36,12 +35,13 @@ def init_db():
     conn = sqlite3.connect('gym.db')
     cursor = conn.cursor()
     
-    # Supplements Table
+    # Supplements Table (Cost Price added for profit calculation)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS supplements (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             brand TEXT NOT NULL,
+            cost_price REAL DEFAULT 0,
             price REAL NOT NULL,
             category TEXT NOT NULL,
             image_url TEXT,
@@ -49,7 +49,7 @@ def init_db():
         )
     ''')
 
-    # Gym Owner Settings (Fees & WhatsApp)
+    # Gym Owner Settings
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS settings (
             id INTEGER PRIMARY KEY,
@@ -60,7 +60,7 @@ def init_db():
         )
     ''')
     
-    # Community Gallery (is_approved: 0 = pending, 1 = approved)
+    # Community Gallery (0 = Pending, 1 = Approved)
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS gallery (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -70,7 +70,19 @@ def init_db():
         )
     ''')
 
-    # Default Setup if empty
+    # Sales & Profit Table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS sales (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            product_id INTEGER,
+            product_name TEXT NOT NULL,
+            quantity INTEGER DEFAULT 1,
+            selling_price REAL NOT NULL,
+            profit REAL NOT NULL,
+            sale_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+
     cursor.execute('SELECT COUNT(*) FROM settings')
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
@@ -81,10 +93,10 @@ def init_db():
     cursor.execute('SELECT COUNT(*) FROM supplements')
     if cursor.fetchone()[0] == 0:
         cursor.execute('''
-            INSERT INTO supplements (name, brand, price, category, image_url, in_stock)
+            INSERT INTO supplements (name, brand, cost_price, price, category, image_url, in_stock)
             VALUES 
-            ('Whey Gold Standard (2kg)', 'Optimum Nutrition', 5999, 'Protein', 'https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=600&q=80', 1),
-            ('Creatine Monohydrate (250g)', 'MuscleBlaze', 999, 'Creatine', 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?auto=format&fit=crop&w=600&q=80', 1)
+            ('Whey Gold Standard (2kg)', 'Optimum Nutrition', 4500, 5999, 'Protein', 'https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?auto=format&fit=crop&w=600&q=80', 1),
+            ('Creatine Monohydrate (250g)', 'MuscleBlaze', 700, 999, 'Creatine', 'https://images.unsplash.com/photo-1593095948071-474c5cc2989d?auto=format&fit=crop&w=600&q=80', 1)
         ''')
 
     cursor.execute('SELECT COUNT(*) FROM gallery')
@@ -125,14 +137,12 @@ def index():
     conn = get_db_connection()
     supplements = conn.execute('SELECT * FROM supplements').fetchall()
     settings = conn.execute('SELECT * FROM settings WHERE id = 1').fetchone()
-    # Sirf approved photos hi public ko dikhengi
     photos = conn.execute('SELECT * FROM gallery WHERE is_approved = 1 ORDER BY id DESC').fetchall()
     conn.close()
     
     upload_msg = request.args.get('msg')
     return render_template('index.html', supplements=supplements, settings=settings, photos=photos, upload_msg=upload_msg)
 
-# Member Upload: Photo Pending me jayegi (is_approved = 0)
 @app.route('/upload_photo', methods=['POST'])
 def upload_photo():
     caption = request.form.get('caption', 'Gym Member').strip()[:60]
@@ -176,15 +186,63 @@ def admin():
     supplements = conn.execute('SELECT * FROM supplements').fetchall()
     settings = conn.execute('SELECT * FROM settings WHERE id = 1').fetchone()
     
-    # Pending photos alag, Approved alag
     pending_photos = conn.execute('SELECT * FROM gallery WHERE is_approved = 0 ORDER BY id DESC').fetchall()
     approved_photos = conn.execute('SELECT * FROM gallery WHERE is_approved = 1 ORDER BY id DESC').fetchall()
+    
+    # Analytics & Sales calculation
+    sales_data = conn.execute('SELECT * FROM sales ORDER BY id DESC LIMIT 10').fetchall()
+    
+    total_sales = conn.execute('SELECT COALESCE(SUM(selling_price * quantity), 0) FROM sales').fetchone()[0]
+    total_profit = conn.execute('SELECT COALESCE(SUM(profit * quantity), 0) FROM sales').fetchone()[0]
+    
+    # Top selling product
+    top_product_row = conn.execute('''
+        SELECT product_name, SUM(quantity) as total_qty 
+        FROM sales 
+        GROUP BY product_name 
+        ORDER BY total_qty DESC LIMIT 1
+    ''').fetchone()
+    top_selling = top_product_row['product_name'] if top_product_row else "None yet"
+
+    # Data for Chart.js
+    chart_rows = conn.execute('''
+        SELECT product_name, SUM(quantity) as qty 
+        FROM sales 
+        GROUP BY product_name
+    ''').fetchall()
+    
+    chart_labels = json.dumps([r['product_name'] for r in chart_rows])
+    chart_values = json.dumps([r['qty'] for r in chart_rows])
+    
     conn.close()
     
     return render_template('admin.html', supplements=supplements, settings=settings, 
-                           pending_photos=pending_photos, approved_photos=approved_photos)
+                           pending_photos=pending_photos, approved_photos=approved_photos,
+                           total_sales=total_sales, total_profit=total_profit,
+                           top_selling=top_selling, sales_data=sales_data,
+                           chart_labels=chart_labels, chart_values=chart_values)
 
-# Admin Photo Approve karna
+# Log a Sale (Counter se sale record karne ke liye)
+@app.route('/record_sale', methods=['POST'])
+def record_sale():
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_login'))
+    
+    prod_id = request.form.get('product_id')
+    qty = int(request.form.get('quantity', 1))
+    
+    conn = get_db_connection()
+    prod = conn.execute('SELECT * FROM supplements WHERE id = ?', (prod_id,)).fetchone()
+    if prod:
+        profit_per_unit = prod['price'] - prod['cost_price']
+        conn.execute('''
+            INSERT INTO sales (product_id, product_name, quantity, selling_price, profit)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (prod['id'], prod['name'], qty, prod['price'], profit_per_unit))
+        conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
 @app.route('/approve_photo/<int:photo_id>')
 def approve_photo(photo_id):
     if not session.get('is_admin'):
@@ -195,13 +253,12 @@ def approve_photo(photo_id):
     conn.close()
     return redirect(url_for('admin'))
 
-# Photo Delete/Reject karna
 @app.route('/delete_photo/<int:photo_id>')
 def delete_photo(photo_id):
     if not session.get('is_admin'):
         return redirect(url_for('admin_login'))
     conn = get_db_connection()
-    photo = conn.execute('SELECT image_url FROM gallery WHERE id = ?', (photo_id,)) .fetchone()
+    photo = conn.execute('SELECT image_url FROM gallery WHERE id = ?', (photo_id,)).fetchone()
     if photo:
         if photo['image_url'].startswith('/static/uploads/'):
             local_path = os.path.join(app.root_path, photo['image_url'].lstrip('/'))
@@ -215,7 +272,6 @@ def delete_photo(photo_id):
     conn.close()
     return redirect(url_for('admin'))
 
-# Admin Direct Official Photo Upload (Yeh seedha approved hogi)
 @app.route('/admin_upload_photo', methods=['POST'])
 def admin_upload_photo():
     if not session.get('is_admin'):
@@ -232,7 +288,6 @@ def admin_upload_photo():
 
     return redirect(url_for('admin'))
 
-# Owner Update Fees & WhatsApp
 @app.route('/update_settings', methods=['POST'])
 def update_settings():
     if not session.get('is_admin'):
@@ -252,7 +307,6 @@ def update_settings():
     conn.close()
     return redirect(url_for('admin'))
 
-# Stock Toggle
 @app.route('/toggle_stock/<int:item_id>')
 def toggle_stock(item_id):
     if not session.get('is_admin'):
@@ -266,14 +320,14 @@ def toggle_stock(item_id):
     conn.close()
     return redirect(url_for('admin'))
 
-# Add Supplement
 @app.route('/add_product', methods=['POST'])
 def add_product():
     if not session.get('is_admin'):
         return redirect(url_for('admin_login'))
     name = request.form.get('name', '').strip()[:80]
     brand = request.form.get('brand', '').strip()[:50]
-    price = request.form.get('price', 0)
+    cost_price = float(request.form.get('cost_price', 0))
+    price = float(request.form.get('price', 0))
     category = request.form.get('category', '').strip()[:40]
     file = request.files.get('product_file')
     
@@ -283,9 +337,9 @@ def add_product():
     
     conn = get_db_connection()
     conn.execute('''
-        INSERT INTO supplements (name, brand, price, category, image_url, in_stock)
-        VALUES (?, ?, ?, ?, ?, 1)
-    ''', (name, brand, price, category, image_url))
+        INSERT INTO supplements (name, brand, cost_price, price, category, image_url, in_stock)
+        VALUES (?, ?, ?, ?, ?, ?, 1)
+    ''', (name, brand, cost_price, price, category, image_url))
     conn.commit()
     conn.close()
     return redirect(url_for('admin'))
