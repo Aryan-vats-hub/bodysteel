@@ -14,14 +14,14 @@
             <p class="text-zinc-400 text-sm">Protected Manager Dashboard</p>
         </div>
         <div class="space-x-3">
-            <a href="/" class="text-sm bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg font-bold">← View Site</a>
+            <a href="/" class="text-sm bg-zinc-800 hover:bg-zinc-700 px-4 py-2 rounded-lg font-bold">← View Live Site</a>
             <a href="/admin-logout" class="text-sm bg-red-600/20 text-red-400 hover:bg-red-600 hover:text-white px-4 py-2 rounded-lg font-bold transition">Logout</a>
         </div>
     </div>
 
-    <!-- Gym WhatsApp & Fees Management -->
+    <!-- Gym WhatsApp & Fees Management (Owner Manually Set Karega) -->
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
-        <h2 class="text-lg font-bold text-amber-500 mb-4">Gym Settings & Pricing</h2>
+        <h2 class="text-lg font-bold text-amber-500 mb-4">Gym Settings & Pricing Controls</h2>
         <form action="/update_settings" method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div>
                 <label class="text-xs text-zinc-400 block mb-1">WhatsApp Number (e.g. 919876543210)</label>
@@ -43,17 +43,68 @@
         </form>
     </div>
 
-    <!-- Add Supplement -->
-    <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6 mb-8">
-        <h2 class="text-lg font-bold mb-4">Add Supplement to Store</h2>
-        <form action="/add_product" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <input type="text" name="name" placeholder="Product Name" required class="bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
-            <input type="text" name="brand" placeholder="Brand Name" required class="bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
-            <input type="number" name="price" placeholder="Price in ₹" required class="bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
-            <input type="text" name="category" placeholder="Category (e.g. Protein, Pre-workout)" required class="bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
-            <input type="url" name="image_url" placeholder="Photo URL (Optional)" class="bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm md:col-span-2">
-            <button type="submit" class="bg-zinc-800 hover:bg-zinc-700 text-white font-bold p-2.5 rounded-lg md:col-span-2 border border-zinc-700 transition">Add Product</button>
-        </form>
+    <!-- PENDING MEMBER PHOTOS (Approve / Reject) -->
+    <div class="bg-zinc-900 border border-amber-500/30 rounded-xl p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-lg font-bold text-amber-400">Pending Member Photos (Needs Approval)</h2>
+                <p class="text-xs text-zinc-400">Members ki upload ki hui photos yahan aayengi. Approve karne par hi site par dikhegi.</p>
+            </div>
+            <span class="bg-amber-500/20 text-amber-400 px-3 py-1 rounded-full text-xs font-bold">{{ pending_photos | length }} Pending</span>
+        </div>
+
+        {% if pending_photos | length == 0 %}
+            <p class="text-zinc-500 text-sm italic py-4">Koi pending photo nahi hai.</p>
+        {% else %}
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {% for pic in pending_photos %}
+                <div class="bg-zinc-800 rounded-lg overflow-hidden border border-zinc-700 flex flex-col justify-between">
+                    <img src="{{ pic.image_url }}" class="h-32 w-full object-cover">
+                    <div class="p-2 text-xs text-zinc-300 truncate">{{ pic.caption }}</div>
+                    <div class="p-2 pt-0 flex gap-2">
+                        <a href="/approve_photo/{{ pic.id }}" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold py-1.5 rounded text-center">Approve</a>
+                        <a href="/delete_photo/{{ pic.id }}" class="flex-1 bg-red-600 hover:bg-red-500 text-white text-xs font-bold py-1.5 rounded text-center">Reject</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+        <!-- Add Supplement Form -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <h2 class="text-lg font-bold mb-4">Add Supplement to Store</h2>
+            <form action="/add_product" method="POST" enctype="multipart/form-data" class="space-y-3">
+                <input type="text" name="name" placeholder="Product Name" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
+                <input type="text" name="brand" placeholder="Brand Name" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="number" name="price" placeholder="Price in ₹" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
+                    <input type="text" name="category" placeholder="Category" required class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">Select Supplement Image (From Device)</label>
+                    <input type="file" name="product_file" accept="image/*" class="w-full text-xs text-zinc-300 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-white cursor-pointer">
+                </div>
+                <button type="submit" class="w-full bg-zinc-800 hover:bg-zinc-700 text-white font-bold p-2.5 rounded-lg border border-zinc-700 transition">Add Product</button>
+            </form>
+        </div>
+
+        <!-- Admin Direct Official Gym Photo Upload -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+            <h2 class="text-lg font-bold mb-4">Admin Upload: Gym Photo</h2>
+            <form action="/admin_upload_photo" method="POST" enctype="multipart/form-data" class="space-y-4">
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">Photo Caption</label>
+                    <input type="text" name="caption" placeholder="e.g. New Dumbbell Rack" class="w-full bg-zinc-800 p-2.5 rounded-lg border border-zinc-700 text-white text-sm">
+                </div>
+                <div>
+                    <label class="text-xs text-zinc-400 block mb-1">Select Photo (From Phone / PC)</label>
+                    <input type="file" name="photo_file" accept="image/*" required class="w-full text-xs text-zinc-300 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-zinc-800 file:text-white cursor-pointer">
+                </div>
+                <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold p-2.5 rounded-lg text-sm transition">Upload Directly to Gallery</button>
+            </form>
+        </div>
     </div>
 
     <!-- Stock Status Manager -->
@@ -83,11 +134,11 @@
         </table>
     </div>
 
-    <!-- Manage Gallery -->
+    <!-- Live Approved Photos (Can Delete anytime) -->
     <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
-        <h3 class="font-bold text-sm mb-4">Moderate Gym Gallery Photos (Delete Spam)</h3>
+        <h3 class="font-bold text-sm mb-4">Currently Live Photos in Gallery</h3>
         <div class="grid grid-cols-2 md:grid-cols-6 gap-4">
-            {% for pic in photos %}
+            {% for pic in approved_photos %}
             <div class="relative bg-zinc-800 rounded-lg overflow-hidden border border-zinc-700 group">
                 <img src="{{ pic.image_url }}" class="h-24 w-full object-cover">
                 <a href="/delete_photo/{{ pic.id }}" onclick="return confirm('Delete this image?')" class="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-0.5 rounded shadow hover:bg-red-700">Delete</a>
