@@ -1,4 +1,3 @@
-
 import os
 import sqlite3
 import uuid
@@ -20,7 +19,6 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Master Password (Environment variable se ya default)
 DEFAULT_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'bodysteel@admin123')
 ADMIN_PASSWORD_HASH = generate_password_hash(DEFAULT_PASSWORD)
 
@@ -218,7 +216,6 @@ def admin():
                            top_selling=top_selling, sales_data=sales_data,
                            chart_labels=chart_labels, chart_values=chart_values)
 
-# --- 100% FIXED TOGGLE STOCK ROUTE ---
 @app.route('/toggle_stock/<int:item_id>', methods=['GET', 'POST'])
 def toggle_stock(item_id):
     if not session.get('is_admin'):
@@ -327,4 +324,20 @@ def add_product():
     cost_price = float(request.form.get('cost_price', 0))
     price = float(request.form.get('price', 0))
     category = request.form.get('category', '').strip()[:40]
-    file = request.files.
+    file = request.files.get('product_file')
+    
+    image_url = save_secure_image(file)
+    if not image_url:
+        image_url = 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=600&q=80'
+    
+    conn = get_db_connection()
+    conn.execute('''
+        INSERT INTO supplements (name, brand, cost_price, price, category, image_url, in_stock)
+        VALUES (?, ?, ?, ?, ?, ?, 1)
+    ''', (name, brand, cost_price, price, category, image_url))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
+if __name__ == '__main__':
+    app.run(debug=True)
