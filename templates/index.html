@@ -132,4 +132,127 @@
                         <li class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Free Body Composition Tracking</li>
                     </ul>
                 </div>
-                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20join%20for%203%20Months%20Plan%20(₹{{ settings.plan_3m | int }})" target="_blank" class="mt-8 block text-center bg-amber-500 hover:bg-amber-400 text-black font-impact
+                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20join%20for%203%20Months%20Plan%20(₹{{ settings.plan_3m | int }})" target="_blank" class="mt-8 block text-center bg-amber-500 hover:bg-amber-400 text-black font-impact tracking-wider text-base uppercase py-3.5 rounded-xl transition shadow-lg shadow-amber-500/20">
+                    Get 3 Months Pass
+                </a>
+            </div>
+
+            <!-- 1 Year -->
+            <div class="bg-zinc-950 border border-zinc-800 p-8 rounded-2xl flex flex-col justify-between hover:border-zinc-700 transition">
+                <div>
+                    <span class="font-sub text-xs font-bold uppercase text-zinc-400 tracking-widest">Iron Dedicated</span>
+                    <h3 class="font-impact text-3xl uppercase tracking-wider text-white mt-1">1 Year Plan</h3>
+                    <div class="my-6">
+                        <span class="font-impact text-6xl text-white leading-none">₹{{ settings.plan_1y | int }}</span>
+                        <span class="font-sub text-xs text-zinc-500 font-bold block mt-1 uppercase tracking-wider">Maximum annual savings</span>
+                    </div>
+                    <ul class="space-y-3 text-xs text-zinc-400 border-t border-zinc-900 pt-6 font-medium">
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Full Year Unlimited Access</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Personalized Form Correction</li>
+                        <li class="flex items-center gap-2"><i class="fas fa-check text-amber-500"></i> Locker & Gym Perks</li>
+                    </ul>
+                </div>
+                <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20join%20for%201%20Year%20Plan%20(₹{{ settings.plan_1y | int }})" target="_blank" class="mt-8 block text-center bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-sub font-bold uppercase py-3.5 rounded-xl text-xs tracking-wider transition">
+                    Enroll 1 Year
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Supplement Store Section -->
+    <section id="store" class="py-24 max-w-6xl mx-auto px-6 border-t border-zinc-900">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-12">
+            <div>
+                <span class="font-sub text-xs uppercase font-bold tracking-[0.25em] text-amber-500">Fuel Your Physique</span>
+                <h2 class="font-impact text-5xl sm:text-6xl uppercase tracking-wider text-white mt-1">Supplement Counter</h2>
+                <p class="font-body text-zinc-400 text-xs sm:text-sm font-medium">100% Genuine batch-verified supplements on reception desk.</p>
+            </div>
+            <div class="mt-4 md:mt-0 font-sub text-xs text-zinc-400 font-bold bg-zinc-900 border border-zinc-800 px-4 py-2.5 rounded-xl flex items-center gap-2 tracking-wider">
+                <i class="fas fa-shield text-amber-500"></i> Instant Pickup at Gym Desk
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {% for item in supplements %}
+            <div class="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden flex flex-col justify-between hover:border-zinc-700 transition">
+                <div class="relative h-56 bg-zinc-900 overflow-hidden">
+                    <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                    <div class="absolute top-3 right-3 font-sub">
+                        {% if item.in_stock == 1 %}
+                            <span class="bg-emerald-500/90 text-black text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md">In Stock</span>
+                        {% else %}
+                            <span class="bg-red-600/90 text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md">Sold Out</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="p-6 flex-1 flex flex-col justify-between">
+                    <div>
+                        <span class="font-sub text-xs font-bold uppercase tracking-widest text-amber-500">{{ item.brand }}</span>
+                        <h4 class="font-body text-base font-bold text-white mt-1 leading-snug">{{ item.name }}</h4>
+                        <div class="font-impact text-4xl text-white mt-3">₹{{ item.price | int }}</div>
+                    </div>
+
+                    <div class="mt-6">
+                        {% if item.in_stock == 1 %}
+                            <a href="https://wa.me/{{ settings.whatsapp_number }}?text=Hi%20Body%20Steel,%20I%20want%20to%20buy%20{{ item.name }}%20priced%20at%20₹{{ item.price | int }}" target="_blank" class="w-full flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-impact tracking-wider text-sm uppercase py-3.5 rounded-xl transition">
+                                <i class="fab fa-whatsapp text-lg"></i> Buy on WhatsApp
+                            </a>
+                        {% else %}
+                            <button disabled class="w-full bg-zinc-900 border border-zinc-800 text-zinc-600 font-sub font-bold uppercase py-3.5 rounded-xl text-xs cursor-not-allowed tracking-wider">
+                                Out of Stock
+                            </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Community & Gym Gallery -->
+    <section id="gallery" class="py-24 max-w-6xl mx-auto px-6 border-t border-zinc-900">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
+            <div>
+                <span class="font-sub text-xs uppercase font-bold tracking-[0.25em] text-amber-500">Brotherhood of Iron</span>
+                <h2 class="font-impact text-5xl sm:text-6xl uppercase tracking-wider text-white mt-1">Arena Gallery</h2>
+                <p class="font-body text-zinc-400 text-xs sm:text-sm font-medium">Member workouts, lifting milestones & arena vibes.</p>
+            </div>
+            
+            <form action="/upload_photo" method="POST" enctype="multipart/form-data" class="bg-zinc-950 border border-zinc-800 p-3 rounded-2xl flex flex-wrap items-center gap-2 w-full md:w-auto">
+                <input type="file" name="photo_file" accept="image/*" required class="font-body text-xs text-zinc-400 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-zinc-800 file:text-amber-400 hover:file:bg-zinc-700 cursor-pointer">
+                <input type="text" name="caption" placeholder="Caption..." class="font-body bg-zinc-900 border border-zinc-800 px-3 py-2 rounded-xl text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500">
+                <button type="submit" class="bg-amber-500 hover:bg-amber-400 text-black font-impact tracking-wider uppercase px-5 py-2.5 rounded-xl text-sm transition">
+                    Upload
+                </button>
+            </form>
+        </div>
+
+        {% if upload_msg == 'uploaded' %}
+        <div class="bg-amber-500/10 border border-amber-500/30 text-amber-400 font-body text-xs font-semibold p-4 rounded-xl mb-8 flex items-center justify-center gap-2">
+            <i class="fas fa-circle-check text-amber-400"></i> Photo uploaded! Admin approval ke baad live dikhegi.
+        </div>
+        {% endif %}
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for pic in photos %}
+            <div class="group relative rounded-2xl overflow-hidden bg-zinc-900 border border-zinc-800/80 aspect-square">
+                <img src="{{ pic.image_url }}" alt="Gym" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                {% if pic.caption %}
+                <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black via-black/60 to-transparent p-3 pt-6 font-sub text-xs font-bold text-zinc-200 tracking-wide">
+                    {{ pic.caption }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-zinc-900 py-10 px-6 text-center">
+        <p class="font-impact text-3xl uppercase tracking-wider text-zinc-300 mb-1">BODY STEEL FITNESS</p>
+        <p class="font-body text-xs text-zinc-600 font-medium">© 2026 Body Steel Gym. Built for strength & community.</p>
+    </footer>
+
+</body>
+</html>
