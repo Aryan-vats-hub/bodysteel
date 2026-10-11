@@ -1,3 +1,4 @@
+
 import os
 import sqlite3
 import uuid
@@ -19,8 +20,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# Dynamic Master Password: Agar Render env me set hai toh wahi lega, warna default.
-# Isse GitHub par kisi ko original password pata nahi chalega!
+# Master Password (Environment variable se ya default)
 DEFAULT_PASSWORD = os.environ.get('ADMIN_PASSWORD', 'bodysteel@admin123')
 ADMIN_PASSWORD_HASH = generate_password_hash(DEFAULT_PASSWORD)
 
@@ -158,7 +158,7 @@ def upload_photo():
 
     return redirect(url_for('index') + '#gallery')
 
-# --- ADMIN SECURE CONTROLS ---
+# --- ADMIN ROUTES ---
 
 @app.route('/admin-login', methods=['GET', 'POST'])
 def admin_login():
@@ -217,6 +217,22 @@ def admin():
                            total_sales=total_sales, total_profit=total_profit,
                            top_selling=top_selling, sales_data=sales_data,
                            chart_labels=chart_labels, chart_values=chart_values)
+
+# --- 100% FIXED TOGGLE STOCK ROUTE ---
+@app.route('/toggle_stock/<int:item_id>', methods=['GET', 'POST'])
+def toggle_stock(item_id):
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_login'))
+    
+    conn = get_db_connection()
+    conn.execute('''
+        UPDATE supplements 
+        SET in_stock = CASE WHEN in_stock = 1 THEN 0 ELSE 1 END 
+        WHERE id = ?
+    ''', (item_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
 
 @app.route('/record_sale', methods=['POST'])
 def record_sale():
@@ -288,4 +304,27 @@ def update_settings():
     if not session.get('is_admin'):
         return redirect(url_for('admin_login'))
     whatsapp = ''.join(ch for ch in request.form.get('whatsapp_number', '') if ch.isdigit())
-    plan_1m = request.form.get
+    plan_1m = request.form.get('plan_1m', 0)
+    plan_3m = request.form.get('plan_3m', 0)
+    plan_1y = request.form.get('plan_1y', 0)
+
+    conn = get_db_connection()
+    conn.execute('''
+        UPDATE settings 
+        SET whatsapp_number = ?, plan_1m = ?, plan_3m = ?, plan_1y = ?
+        WHERE id = 1
+    ''', (whatsapp, plan_1m, plan_3m, plan_1y))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('admin'))
+
+@app.route('/add_product', methods=['POST'])
+def add_product():
+    if not session.get('is_admin'):
+        return redirect(url_for('admin_login'))
+    name = request.form.get('name', '').strip()[:80]
+    brand = request.form.get('brand', '').strip()[:50]
+    cost_price = float(request.form.get('cost_price', 0))
+    price = float(request.form.get('price', 0))
+    category = request.form.get('category', '').strip()[:40]
+    file = request.files.
